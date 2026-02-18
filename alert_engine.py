@@ -5,11 +5,7 @@ CPU_WARNING = 80
 RAM_WARNING = 85
 DISK_WARNING = 85
 
-async def check_all_alerts(context):
-
-    chat_id = context.job.data
-    bot = context.bot
-
+async def check_all_alerts(chat_id, bot):
     metrics = get_server_metrics()
 
     # CPU
@@ -44,10 +40,8 @@ async def check_all_alerts(context):
 
     # CONTENEDORES
     containers = get_container_status()
-
     for c in containers:
         key = f"container_{c['name']}"
-
         if c["status"] != "running":
             msg = trigger_alert(
                 key,

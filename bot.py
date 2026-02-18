@@ -90,17 +90,18 @@ async def main():
         kwargs={},
         id="alert_engine",
         replace_existing=True,
-        job_kwargs={"misfire_grace_time": 30},
+        kwargs={"misfire_grace_time": 30},
         data=CHAT_ID
     )
 
     scheduler.add_job(
-        daily_summary,
-        "cron",
-        hour=10,
-        minute=0,
-        id="daily_summary",
-        replace_existing=True
+        check_all_alerts,
+        trigger="interval",
+        minutes=2,
+        kwargs={"chat_id": CHAT_ID},
+        id="alert_engine",
+        replace_existing=True,
+        misfire_grace_time=30
     )
 
     scheduler.start()
