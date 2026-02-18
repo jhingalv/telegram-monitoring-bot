@@ -87,7 +87,6 @@ async def main():
         "interval",
         minutes=2,
         args=[],
-        kwargs={},
         id="alert_engine",
         replace_existing=True,
         kwargs={"misfire_grace_time": 30},
