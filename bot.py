@@ -53,7 +53,7 @@ async def alerts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(msg)
 
-# Daily 10:00 brief
+# Daily 10:00 summary
 async def daily_summary(context: ContextTypes.DEFAULT_TYPE):
     m = get_server_metrics()
     last_alerts = get_last_24h_alerts()
@@ -67,7 +67,6 @@ Disco actual: {m['disk']}%
 
 Alertas últimas 24h: {len(last_alerts)}
 """
-
     await context.bot.send_message(chat_id=CHAT_ID, text=msg)
 
 # MAIN
@@ -87,13 +86,13 @@ async def main():
         check_all_alerts,
         trigger="interval",
         minutes=2,
-        kwargs={"chat_id": CHAT_ID, "bot": app.bot},
+        args=[app.bot, CHAT_ID],
         id="alert_engine",
         replace_existing=True,
         misfire_grace_time=30
     )
 
-    # Daily 10:00 brief
+    # Daily 10 am brief job
     scheduler.add_job(
         daily_summary,
         trigger="cron",
