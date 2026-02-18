@@ -31,11 +31,9 @@ Load: {m['load']}
 # /dockerstatus
 async def docker_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     containers = get_container_status()
-
     running = [c for c in containers if c["status"] == "running"]
 
     msg = f"🐳 Contenedores activos: {len(running)}/{len(containers)}\n\n"
-
     for c in containers:
         msg += f"{c['name']} → {c['status']}\n"
 
@@ -55,7 +53,7 @@ async def alerts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(msg)
 
-# RESUMEN DIARIO 10:00
+# Daily 10:00 brief
 async def daily_summary(context: ContextTypes.DEFAULT_TYPE):
     m = get_server_metrics()
     last_alerts = get_last_24h_alerts()
@@ -76,35 +74,36 @@ Alertas últimas 24h: {len(last_alerts)}
 async def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
+    # Comands
     app.add_handler(CommandHandler("serverstatus", server_status))
     app.add_handler(CommandHandler("dockerstatus", docker_status))
     app.add_handler(CommandHandler("alerts", alerts_command))
 
+    # Scheduler
     scheduler = AsyncIOScheduler()
 
-    scheduler.add_job(
-        check_all_alerts,
-        "interval",
-        minutes=2,
-        args=[],
-        id="alert_engine",
-        replace_existing=True,
-        kwargs={"misfire_grace_time": 30},
-        data=CHAT_ID
-    )
-
+    # Alerts each 2 minutes job
     scheduler.add_job(
         check_all_alerts,
         trigger="interval",
         minutes=2,
-        kwargs={"chat_id": CHAT_ID},
+        kwargs={"chat_id": CHAT_ID, "bot": app.bot},
         id="alert_engine",
         replace_existing=True,
         misfire_grace_time=30
     )
 
-    scheduler.start()
+    # Daily 10:00 brief
+    scheduler.add_job(
+        daily_summary,
+        trigger="cron",
+        hour=10,
+        minute=0,
+        id="daily_summary",
+        replace_existing=True
+    )
 
+    scheduler.start()
     await app.run_polling()
 
 if __name__ == "__main__":
