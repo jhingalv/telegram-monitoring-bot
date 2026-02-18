@@ -1,9 +1,9 @@
 from alerts import trigger_alert, resolve_alert
 from monitor import get_server_metrics, get_container_status
 
-CPU_WARNING = 80
-RAM_WARNING = 85
-DISK_WARNING = 85
+CPU_WARNING = 50
+RAM_WARNING = 50
+DISK_WARNING = 50
 
 async def check_all_alerts(chat_id, bot):
     metrics = get_server_metrics()
