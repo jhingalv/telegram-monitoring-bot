@@ -1,9 +1,9 @@
 import os
-import asyncio
 from datetime import datetime
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import asyncio
 
 from monitor import get_server_metrics, get_container_status
 from alerts import get_active_alerts, get_last_24h_alerts
@@ -30,11 +30,9 @@ Disco: {m['disk']}%
 async def docker_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     containers = get_container_status()
     running = [c for c in containers if c["status"] == "running"]
-
     msg = f"🐳 Contenedores activos: {len(running)}/{len(containers)}\n\n"
     for c in containers:
         msg += f"{c['name']} → {c['status']}\n"
-
     await update.message.reply_text(msg)
 
 async def alerts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -63,7 +61,7 @@ Alertas últimas 24h: {len(last_alerts)}
     await bot.send_message(chat_id=chat_id, text=msg)
 
 # --- MAIN ---
-async def main():
+def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
     # Commands
@@ -74,17 +72,14 @@ async def main():
     # Scheduler
     scheduler = AsyncIOScheduler()
 
-    # Wrapper to create async tasks
+    # Use lambda + create_task to work with async
     scheduler.add_job(lambda: asyncio.create_task(check_all_alerts(CHAT_ID, app.bot)),
                       "interval", minutes=2, id="alert_engine", replace_existing=True)
-
     scheduler.add_job(lambda: asyncio.create_task(daily_summary(CHAT_ID, app.bot)),
                       "cron", hour=10, minute=0, id="daily_summary", replace_existing=True)
-
     scheduler.start()
 
-    # Executes Telegram polling (loop async)
-    await app.run_polling()
+    app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
