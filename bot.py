@@ -1,9 +1,9 @@
 import os
-import asyncio
 from datetime import datetime
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import asyncio
 
 from monitor import get_server_metrics, get_container_status
 from alerts import get_active_alerts, get_last_24h_alerts
@@ -61,7 +61,7 @@ Alertas últimas 24h: {len(last_alerts)}
     await bot.send_message(chat_id=chat_id, text=msg)
 
 # --- MAIN ---
-async def main_async():
+def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
     # Commands
@@ -78,7 +78,8 @@ async def main_async():
     
     scheduler.start()
 
-    await app.run_polling()
+    # Run the bot (this blocks, no asyncio.run needed)
+    app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main_async())
+    main()
