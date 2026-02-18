@@ -86,7 +86,7 @@ async def main():
         check_all_alerts,
         trigger="interval",
         minutes=2,
-        args=[app.bot, CHAT_ID],
+        args=[CHAT_ID, app.bot],
         id="alert_engine",
         replace_existing=True,
         misfire_grace_time=30
