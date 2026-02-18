@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from monitor import get_server_metrics, get_container_status
 from alerts import get_active_alerts, get_last_24h_alerts
@@ -79,7 +79,7 @@ def main():
     app.add_handler(CommandHandler("alerts", alerts_command))
 
     # Scheduler
-    scheduler = AsyncIOScheduler()
+    scheduler = BackgroundScheduler()
     scheduler.add_job(check_all_alerts, "interval", minutes=2, args=[CHAT_ID, app.bot], id="alert_engine", replace_existing=True)
     scheduler.add_job(daily_summary, "cron", hour=10, minute=0, args=[CHAT_ID, app.bot], id="daily_summary", replace_existing=True)
     scheduler.start()
