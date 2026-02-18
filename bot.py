@@ -63,7 +63,7 @@ Alertas últimas 24h: {len(last_alerts)}
     await bot.send_message(chat_id=chat_id, text=msg)
 
 # --- MAIN ---
-def main():
+async def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
     # Commands
@@ -74,20 +74,17 @@ def main():
     # Scheduler
     scheduler = AsyncIOScheduler()
 
-    loop = asyncio.get_event_loop()
+    # Wrapper to create async tasks
+    scheduler.add_job(lambda: asyncio.create_task(check_all_alerts(CHAT_ID, app.bot)),
+                      "interval", minutes=2, id="alert_engine", replace_existing=True)
 
-    # Wrapper to create asyncio tasks from the scheduler
-    def schedule_alerts():
-        asyncio.create_task(check_all_alerts(CHAT_ID, app.bot))
+    scheduler.add_job(lambda: asyncio.create_task(daily_summary(CHAT_ID, app.bot)),
+                      "cron", hour=10, minute=0, id="daily_summary", replace_existing=True)
 
-    def schedule_daily():
-        asyncio.create_task(daily_summary(CHAT_ID, app.bot))
-
-    scheduler.add_job(schedule_alerts, "interval", minutes=2, id="alert_engine", replace_existing=True)
-    scheduler.add_job(schedule_daily, "cron", hour=10, minute=0, id="daily_summary", replace_existing=True)
     scheduler.start()
 
-    loop.run_until_complete(app.run_polling())
+    # Executes Telegram polling (loop async)
+    await app.run_polling()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
