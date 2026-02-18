@@ -1,0 +1,61 @@
+from alerts import trigger_alert, resolve_alert
+from monitor import get_server_metrics, get_container_status
+
+CPU_WARNING = 80
+RAM_WARNING = 85
+DISK_WARNING = 85
+
+async def check_all_alerts(context):
+
+    chat_id = context.job.data
+    bot = context.bot
+
+    metrics = get_server_metrics()
+
+    # CPU
+    if metrics["cpu"] > CPU_WARNING:
+        msg = trigger_alert("cpu_high", f"🚨 CPU alta: {metrics['cpu']}%")
+        if msg:
+            await bot.send_message(chat_id=chat_id, text=msg)
+    else:
+        resolved = resolve_alert("cpu_high")
+        if resolved:
+            await bot.send_message(chat_id=chat_id, text=resolved)
+
+    # RAM
+    if metrics["ram"] > RAM_WARNING:
+        msg = trigger_alert("ram_high", f"🚨 RAM alta: {metrics['ram']}%")
+        if msg:
+            await bot.send_message(chat_id=chat_id, text=msg)
+    else:
+        resolved = resolve_alert("ram_high")
+        if resolved:
+            await bot.send_message(chat_id=chat_id, text=resolved)
+
+    # DISK
+    if metrics["disk"] > DISK_WARNING:
+        msg = trigger_alert("disk_high", f"🚨 Disco alto: {metrics['disk']}%")
+        if msg:
+            await bot.send_message(chat_id=chat_id, text=msg)
+    else:
+        resolved = resolve_alert("disk_high")
+        if resolved:
+            await bot.send_message(chat_id=chat_id, text=resolved)
+
+    # CONTENEDORES
+    containers = get_container_status()
+
+    for c in containers:
+        key = f"container_{c['name']}"
+
+        if c["status"] != "running":
+            msg = trigger_alert(
+                key,
+                f"🐳 Contenedor caído: {c['name']} ({c['status']})"
+            )
+            if msg:
+                await bot.send_message(chat_id=chat_id, text=msg)
+        else:
+            resolved = resolve_alert(key)
+            if resolved:
+                await bot.send_message(chat_id=chat_id, text=resolved)
