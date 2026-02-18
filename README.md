@@ -74,6 +74,7 @@ To keep sensitive variables out of the repository, you must use **GitHub Secrets
 | `VPS_HOST`    | VPS IP address or domain                       |
 | `VPS_USER`    | SSH user to connect to the VPS                 |
 | `VPS_SSH_KEY` | Private SSH key to access the VPS              |
+| `VPS_SSH_PORT`| SSH por to connect to the VPS                  |
 | `BOT_TOKEN`   | Your Telegram bot token (@BotFather)           |
 | `CHAT_ID`     | Telegram chat ID where alerts will be received |
 
@@ -137,6 +138,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT }}
           script: |
             cd /opt/bot-monitor
             git pull origin main
