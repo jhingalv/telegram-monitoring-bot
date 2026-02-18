@@ -1,6 +1,5 @@
 from alerts import trigger_alert, resolve_alert
 from monitor import get_server_metrics, get_container_status
-import asyncio
 
 CPU_WARNING = 80
 RAM_WARNING = 85
@@ -11,7 +10,7 @@ async def check_all_alerts(chat_id, bot):
 
     # --- CPU ---
     if metrics["cpu"] > CPU_WARNING:
-        msg = trigger_alert("cpu_high", f"🚨 CPU alta: {metrics['cpu']}%")
+        msg = trigger_alert("cpu_high", f"📊🚨 High CPU usage: {metrics['cpu']}%")
         if msg:
             await bot.send_message(chat_id=chat_id, text=msg)
             print(f"CPU alert sent: {msg}")
@@ -23,7 +22,7 @@ async def check_all_alerts(chat_id, bot):
 
     # --- RAM ---
     if metrics["ram"] > RAM_WARNING:
-        msg = trigger_alert("ram_high", f"🚨 RAM alta: {metrics['ram']}%")
+        msg = trigger_alert("ram_high", f"📊🚨 High RAM usage: {metrics['ram']}%")
         if msg:
             await bot.send_message(chat_id=chat_id, text=msg)
             print(f"RAM alert sent: {msg}")
@@ -35,7 +34,7 @@ async def check_all_alerts(chat_id, bot):
 
     # --- DISK ---
     if metrics["disk"] > DISK_WARNING:
-        msg = trigger_alert("disk_high", f"🚨 Disco alto: {metrics['disk']}%")
+        msg = trigger_alert("disk_high", f"📊🚨 High DISK usage: {metrics['disk']}%")
         if msg:
             await bot.send_message(chat_id=chat_id, text=msg)
             print(f"Disk alert sent: {msg}")
@@ -52,7 +51,7 @@ async def check_all_alerts(chat_id, bot):
         if c["status"] != "running":
             msg = trigger_alert(
                 key,
-                f"🐳 Contenedor caído: {c['name']} ({c['status']})"
+                f"🐳🚨 Container error: {c['name']} ({c['status']})"
             )
             if msg:
                 await bot.send_message(chat_id=chat_id, text=msg)

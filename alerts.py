@@ -30,7 +30,7 @@ def resolve_alert(key):
                 break
 
         duration = datetime.now() - started_at
-        return f"✅ Resuelto: {message}\nDuración: {duration}"
+        return f"✅ Solved:\n - {message}\n⌛ Duration:\n - {duration}"
 
     return None
 

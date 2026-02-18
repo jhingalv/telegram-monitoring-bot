@@ -20,9 +20,9 @@ async def server_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = f"""
 📊 Server Status
 
-- CPU: {m['cpu']}%
-- RAM: {m['ram']}%
-- Disco: {m['disk']}%
+ - CPU use: {m['cpu']}%
+ - RAM use: {m['ram']}%
+ - Disk use: {m['disk']}%
 
 🚨 Active Alerts: {len(active)}
 """
@@ -31,7 +31,7 @@ async def server_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def docker_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     containers = get_container_status()
     running = [c for c in containers if c["status"] == "running"]
-    msg = f"🐳 Contenedores activos: {len(running)}/{len(containers)}\n\n"
+    msg = f"🐳 Active containers: {len(running)}/{len(containers)}\n\n"
     for c in containers:
         msg += f"{c['name']} → {c['status']}\n"
     await update.message.reply_text(msg)
@@ -39,11 +39,11 @@ async def docker_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def alerts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     active = get_active_alerts()
     if not active:
-        await update.message.reply_text("✅ No hay alertas activas")
+        await update.message.reply_text("✅ No active alerts")
         return
-    msg = "🚨 Alertas vigentes:\n\n"
+    msg = "⚠️ Current Alerts:\n\n"
     for v in active.values():
-        msg += f"{v['message']}\nDesde: {v['started_at']}\n\n"
+        msg += f"{v['message']}\nSince: {v['started_at']}\n\n"
     await update.message.reply_text(msg)
 
 # --- Daily summary ---
@@ -51,34 +51,30 @@ async def daily_summary(chat_id, bot):
     m = get_server_metrics()
     last_alerts = get_last_24h_alerts()
     msg = f"""
-📅 Resumen Diario ({datetime.now().date()})
+📅 Daily Brief ({datetime.now().date()})
 
-CPU use: {m['cpu']}%
-RAM use: {m['ram']}%
-Disco use: {m['disk']}%
+ - CPU use: {m['cpu']}%
+ - RAM use: {m['ram']}%
+ - Disk use: {m['disk']}%
 
-Alertas últimas 24h: {len(last_alerts)}
+⚠️ Alerts in the last 24h: {len(last_alerts)}
 """
     await bot.send_message(chat_id=chat_id, text=msg)
 
 # --- MAIN ---
 def main():
-    # Build the app
+
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # Commands
     app.add_handler(CommandHandler("serverstatus", server_status))
     app.add_handler(CommandHandler("dockerstatus", docker_status))
     app.add_handler(CommandHandler("alerts", alerts_command))
 
-    # Scheduler (Background, no asyncio loop required)
     scheduler = BackgroundScheduler()
 
-    # Job de alert engine each 2 minutes
     scheduler.add_job(lambda: asyncio.run(check_all_alerts(CHAT_ID, app.bot)),
-                      "interval", minutes=2, id="alert_engine", replace_existing=True)
+                      "interval", minutes=1, id="alert_engine", replace_existing=True)
 
-    # Job de daily summary at 10:00
     scheduler.add_job(lambda: asyncio.run(daily_summary(CHAT_ID, app.bot)),
                       "cron", hour=10, minute=0, id="daily_summary", replace_existing=True)
 
