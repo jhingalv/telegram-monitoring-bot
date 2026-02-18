@@ -70,42 +70,21 @@ Alertas últimas 24h: {len(last_alerts)}
     await bot.send_message(chat_id=chat_id, text=msg)
 
 # MAIN
-async def main():
+def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # Comands
+    # Commands
     app.add_handler(CommandHandler("serverstatus", server_status))
     app.add_handler(CommandHandler("dockerstatus", docker_status))
     app.add_handler(CommandHandler("alerts", alerts_command))
 
     # Scheduler
     scheduler = AsyncIOScheduler()
-
-    # Alerts each 2 minutes job
-    scheduler.add_job(
-        check_all_alerts,
-        trigger="interval",
-        minutes=2,
-        args=[CHAT_ID, app.bot],
-        id="alert_engine",
-        replace_existing=True,
-        misfire_grace_time=30
-    )
-
-    # Daily 10 am brief job
-    scheduler.add_job(
-        daily_summary,
-        trigger="cron",
-        hour=10,
-        minute=0,
-        args=[CHAT_ID, app.bot],
-        id="daily_summary",
-        replace_existing=True
-    )
-
+    scheduler.add_job(check_all_alerts, "interval", minutes=2, args=[CHAT_ID, app.bot], id="alert_engine", replace_existing=True)
+    scheduler.add_job(daily_summary, "cron", hour=10, minute=0, args=[CHAT_ID, app.bot], id="daily_summary", replace_existing=True)
     scheduler.start()
-    await app.run_polling()
+
+    app.run_polling()
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    main()
