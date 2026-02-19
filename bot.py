@@ -24,7 +24,7 @@ async def server_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
  - RAM use: {m['ram']}%
  - Disk use: {m['disk']}%
 
-🚨 Active Alerts: {len(active)}
+⚠️ Active Alerts: {len(active)}
 """
     await update.message.reply_text(msg)
 

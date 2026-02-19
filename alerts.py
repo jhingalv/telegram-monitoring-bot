@@ -29,8 +29,8 @@ def resolve_alert(key):
                 alert["resolved_at"] = datetime.now().replace(microsecond=0)
                 break
 
-        duration = datetime.now() - started_at
-        return f"✅ Solved:\n    {message}\n\n⌛ Duration:\n    {duration}"
+        duration = datetime.now().replace(microsecond=0) - started_at
+        return f"✅ Solved:\n\n{message}\n\n⌛ Duration:\n{duration}"
 
     return None
 
