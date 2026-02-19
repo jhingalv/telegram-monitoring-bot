@@ -43,7 +43,7 @@ async def alerts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     msg = "⚠️ Current Alerts:\n\n"
     for v in active.values():
-        msg += f"{v['message']}\nSince: {v['started_at']}\n\n"
+        msg += f"{v['message']}\n⌛ Since: {v['started_at']}\n\n"
     await update.message.reply_text(msg)
 
 # --- Daily summary ---
