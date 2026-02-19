@@ -6,5 +6,8 @@ services:
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
       CHAT_ID: ${CHAT_ID}
+      TZ: Europe/Madrid
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
