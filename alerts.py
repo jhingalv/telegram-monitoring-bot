@@ -7,12 +7,12 @@ def trigger_alert(key, message):
     if key not in active_alerts:
         active_alerts[key] = {
             "message": message,
-            "started_at": datetime.now()
+            "started_at": datetime.now().replace(microsecond=0)
         }
         alert_history.append({
             "key": key,
             "message": message,
-            "started_at": datetime.now(),
+            "started_at": datetime.now().replace(microsecond=0),
             "resolved_at": None
         })
         return message
@@ -26,11 +26,11 @@ def resolve_alert(key):
 
         for alert in reversed(alert_history):
             if alert["key"] == key and alert["resolved_at"] is None:
-                alert["resolved_at"] = datetime.now()
+                alert["resolved_at"] = datetime.now().replace(microsecond=0)
                 break
 
         duration = datetime.now() - started_at
-        return f"✅ Solved:\n - {message}\n⌛ Duration:\n - {duration}"
+        return f"✅ Solved:\n    {message}\n\n⌛ Duration:\n    {duration}"
 
     return None
 
