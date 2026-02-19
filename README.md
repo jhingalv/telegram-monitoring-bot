@@ -88,8 +88,6 @@ To keep sensitive variables out of the repository, you must use **GitHub Secrets
 `docker-compose.yml` file:
 
 ```yaml
-version: "3.9"
-
 services:
   bot-monitor:
     build: .
@@ -98,8 +96,11 @@ services:
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
       CHAT_ID: ${CHAT_ID}
+      TZ: Europe/Madrid
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 ```
 
 * The `/var/run/docker.sock` volume allows the bot to access and inspect Docker containers on the VPS.
@@ -165,7 +166,7 @@ jobs:
   * CPU > 80%
   * RAM > 85%
   * Disk > 85%
-  * Container down
+
 * Notification when an alert condition is resolved
 * Daily summary at 10:00 AM
 * Quick access via `/serverstatus`, `/dockerstatus`, and `/alerts`
